@@ -10,6 +10,7 @@ on:
 
 # Lista de jobs a serem executados
 jobs:
+  #Job 1: CI - Testes e Validacao
   ci:
     # Sistema operacional onde o job será executado
     runs-on: ubuntu-latest
@@ -29,3 +30,31 @@ jobs:
     # Passo 3: Executar testes
      - name: Executar testes 
        run: mvn -B test --file pom.xml
+
+  #Job 2: CD - Deploy (executado somente se o job CI for bem-sucedido)
+  cd:
+    needs: ci
+    # Só roda em push direto no branch main
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+     - name: Fazer checkout do código
+       uses: actions/checkout@v4
+
+     - name: Configurar Java 21
+       uses: actions/setup-java@v4
+       with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    # Geramos o pacote .jar, pulando os testes que ja rodaram no job de CI
+     - name: Gerar JAR para deploy
+       run: mvn -B package --file pom.xml -DskipTests
+    
+    # Faz upload do .jar como um artefato do workflow
+     - name: Upload jar para deploy
+       uses: actions/upload-artifact@v4
+       with:
+        name: meu-app-jar
+        path: target/*.jar
