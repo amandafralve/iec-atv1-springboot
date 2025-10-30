@@ -26,6 +26,7 @@ jobs:
        uses: actions/setup-java@v4
        with:
         java-version: '21'
+        distribution: 'temurin'
 
     # Passo 3: Executar testes
      - name: Executar testes 
@@ -56,5 +57,5 @@ jobs:
      - name: Upload jar para deploy
        uses: actions/upload-artifact@v4
        with:
-        name: meu-app-jar
+        name: app-jar
         path: target/*.jar
